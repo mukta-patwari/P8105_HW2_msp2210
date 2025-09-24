@@ -54,4 +54,22 @@ snp_df =
   select (-day)
 ```
 
+Cleaning 'unemployment' dataset
+```{r unemployment}
+unemployment_df =
+  read_csv("fivethirtyeight_datasets/unemployment.csv") %>% 
+  janitor::clean_names() %>% 
+  drop_na %>% 
+  pivot_longer(
+    cols = jan:dec,
+    names_to = "month",
+    values_to = "percent unemployed"
+  ) %>% 
+  mutate(
+    month = str_to_title(month),
+    year = as.character(year)
+  )
+```
+
+
 
