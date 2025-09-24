@@ -15,3 +15,27 @@ library(tidyverse)
 library(haven)
 library(readxl)
 ```
+
+## Problem 1
+
+Cleaning 'pols-month' dataset
+```{r pols-month}
+pols_month_df =
+  read_csv("fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names () %>% 
+  separate(
+    mon, into = c("year", "month", "day"),
+    sep = "-"
+  ) %>% 
+  mutate(
+    month = month.name[as.numeric(month)]
+  ) %>% 
+  mutate(
+    president = case_when(
+      prez_gop == 1 ~ "gop",
+      prez_dem == 1 ~ "dem"
+    )
+  ) %>% 
+  select(-prez_dem, -prez_gop, -day)
+```
+
