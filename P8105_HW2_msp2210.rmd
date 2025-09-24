@@ -42,11 +42,12 @@ pols_month_df =
 Cleaning 'snp' dataset
 ```{r snp}
 snp_df =
-  read_csv("fivethirtyeight_datasets/snp.csv") %>% 
+  read_csv("fivethirtyeight_datasets/snp.csv", 
+      col_types = cols(date = col_date(format = "%m/%d/%y"))) %>% 
   janitor::clean_names() %>% 
   separate(
-    date, into = c("day", "month", "year"),
-    sep = "/"
+    date, into = c("year", "month", "day"),
+    convert = TRUE,
   ) %>% 
   mutate(
     month = month.name[as.numeric(month)]
