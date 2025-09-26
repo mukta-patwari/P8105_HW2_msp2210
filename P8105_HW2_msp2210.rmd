@@ -50,7 +50,8 @@ snp_df =
     convert = TRUE,
   ) %>% 
   mutate(
-    month = month.name[as.numeric(month)]
+    month = month.name[as.numeric(month)],
+    year = as.character(year)
   ) %>% 
   select (-day)
 ```
@@ -72,5 +73,15 @@ unemployment_df =
   )
 ```
 
+Merging the 'pols-month' and 'snp' datasets together
+```{r first-merge}
+merged_pols_snp =
+  left_join(pols_month_df, snp_df, by = c("year", "month"))
+```
 
+Merging the new dataset with 'unemployment'
+```{r}
+merged_pols_snp_unemployment =
+  left_join(merged_pols_snp, unemployment_df, by = c("year", "month"))
+```
 
