@@ -126,7 +126,7 @@ gwynnda_df =
   janitor::clean_names() %>%
   drop_na(dumpster) %>% 
   mutate(
-    trashwheel_name = "Gywndda Trash Wheel"
+    trashwheel_name = "Gwynnda Trash Wheel"
   )
 ```
 
@@ -135,3 +135,5 @@ Merging datasets
 trashwheel_df =
   bind_rows(mrtrash_df, proftrash_df, gwynnda_df)
 ```
+
+The cleaned dataset contains `r nrow(trashwheel_df)` observations of trash collected by Mr. Trash Wheel, Professor Trash Wheel, and Gwynnda. Key variables include `dumpster` (the dumpster number where the trash is collected) `weight_tons` (the weight in tons of trash collected), `trashwheel_name` (shows which trash wheel collected the trash). An interesting variable is `homes_powered`, which captures how many homes benefitted from the trash wheel collecting trash to be incinerated and to be converted to electricity. 
