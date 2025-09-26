@@ -65,7 +65,7 @@ unemployment_df =
   pivot_longer(
     cols = jan:dec,
     names_to = "month",
-    values_to = "percent unemployed"
+    values_to = "percent_unemployed"
   ) %>% 
   mutate(
     month = str_to_title(month),
@@ -85,3 +85,7 @@ merged_pols_snp_unemployment =
   left_join(merged_pols_snp, unemployment_df, by = c("year", "month"))
 ```
 
+The cleaned 'pols-month dataset' contains `r nrow(pols_month_df)` rows and the following `r ncol(pols_month_df)` variables: `r colnames(pols_month_df)`. This dataset relates to politicians in the U.S., like what position they hold (presidential or in Congress), and their party affiliation, Democrat or Republican. The 'snp' dataset refers to the S&P index, and contains `r nrow(snp_df)` rows with the date of the observation and the price at closing. The cleaned 'unemployment' dataset contains `r nrow(unemployment_df)` rows and gives the percentage of people unemployed in the month of each year. 
+
+Combining these three data sets creates a merged dataset of `r nrow(merged_pols_snp_unemployment)` rows with these variables: `r colnames(merged_pols_snp_unemployment)`. The years range from `r min(pull(merged_pols_snp_unemployment, year))` to `r max(pull(merged_pols_snp_unemployment, year))`, which helps to capture the differences in political affiliations, stock market events, and unemployment rates. As the initial 'snp' dataset and 'unemployment' dataset contained less than 822 observations, there are unfortunately several NAs for the columns of close and percent_unemployed in the merged dataset. 
+ 
