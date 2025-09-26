@@ -80,7 +80,7 @@ merged_pols_snp =
 ```
 
 Merging the new dataset with 'unemployment'
-```{r}
+```{r second-merge}
 merged_pols_snp_unemployment =
   left_join(merged_pols_snp, unemployment_df, by = c("year", "month"))
 ```
@@ -88,4 +88,50 @@ merged_pols_snp_unemployment =
 The cleaned 'pols-month dataset' contains `r nrow(pols_month_df)` rows and the following `r ncol(pols_month_df)` variables: `r colnames(pols_month_df)`. This dataset relates to politicians in the U.S., like what position they hold (presidential or in Congress), and their party affiliation, Democrat or Republican. The 'snp' dataset refers to the S&P index, and contains `r nrow(snp_df)` rows with the date of the observation and the price at closing. The cleaned 'unemployment' dataset contains `r nrow(unemployment_df)` rows and gives the percentage of people unemployed in the month of each year. 
 
 Combining these three data sets creates a merged dataset of `r nrow(merged_pols_snp_unemployment)` rows with these variables: `r colnames(merged_pols_snp_unemployment)`. The years range from `r min(pull(merged_pols_snp_unemployment, year))` to `r max(pull(merged_pols_snp_unemployment, year))`, which helps to capture the differences in political affiliations, stock market events, and unemployment rates. As the initial 'snp' dataset and 'unemployment' dataset contained less than 822 observations, there are unfortunately several NAs for the columns of close and percent_unemployed in the merged dataset. 
- 
+
+## Problem 2
+
+Cleaning Mr. Trash Wheel dataset
+```{r mrtrashwheel}
+mrtrash_df =
+  read_excel("202409 Trash Wheel Collection Data.xlsx", sheet = 1, range = "A2:N653", col_names = TRUE) %>% 
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(
+    year = as.numeric(year)
+  ) %>% 
+  mutate(
+    sports_balls = as.integer(round(sports_balls))
+  ) %>% 
+  mutate(
+    trashwheel_name = "Mr. Trash Wheel"
+  )
+```
+
+Cleaning Professor Trash Wheel dataset
+```{r proftrash}
+proftrash_df =
+  read_excel("202409 Trash Wheel Collection Data.xlsx", sheet = 2, range = "A2:M120", col_names = TRUE) %>% 
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(
+    trashwheel_name = "Professor Trash Wheel"
+  )
+```
+
+Cleaning Gwynnda dataset
+```{r gwynnda}
+gwynnda_df =
+  read_excel("202409 Trash Wheel Collection Data.xlsx", sheet = 4, range = "A2:L265", col_names = TRUE) %>% 
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>% 
+  mutate(
+    trashwheel_name = "Gywndda Trash Wheel"
+  )
+```
+
+Merging datasets
+```{r trash-wheel-merge}
+trashwheel_df =
+  bind_rows(mrtrash_df, proftrash_df, gwynnda_df)
+```
