@@ -142,7 +142,8 @@ The cleaned dataset contains `r nrow(trashwheel_df)` observations of trash colle
 Importing and tidying zipcodes dataset
 ```{r zipcodes}
 zipcodes_df =
-  read_csv("zillow_data/Zip Codes.csv") %>% 
+  read_csv("zillow_data/Zip Codes.csv") %>%
+  drop_na() %>% 
   janitor::clean_names() %>% 
   mutate(file_date = as.Date(file_date, format = "%m/%d/%y")) %>% 
   rename(date = file_date)
@@ -152,15 +153,15 @@ Importing and tidying ZORI data
 ```{r zori}
 zori_df =
   read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv") %>% 
-  rename_with(janitor::make_clean_names, .cols = 1:9) %>% 
   drop_na() %>% 
+  rename_with(janitor::make_clean_names, .cols = 1:9) %>% 
   pivot_longer(
     cols = "2015-01-31":"2024-08-31",
     names_to = "date",
     values_to = "rent",
   ) %>% 
   mutate(
-    county_name = (gsub("County", "", county_name)),
+    county_name = str_trim(gsub("County", "", county_name)),
     date = as.Date(date)
   ) %>% 
   rename(zip_code = region_name, county = county_name)
@@ -171,7 +172,16 @@ Merging zip codes and ZORI datasets
 zillow_df =
   full_join(
     zori_df, zipcodes_df
-    )
+    ) %>%
+  relocate(date, zip_code, county)
 ```
 
-The new merged dataset has `r nrow(zillow_df)` observations.
+Finding unique observations
+```{r}
+zillow_df %>% 
+  select(zip_code) %>% 
+  distinct()
+```
+
+
+The new merged dataset has `r nrow(zillow_df)` observations. There are 179 unique zip codes in the dataset...
