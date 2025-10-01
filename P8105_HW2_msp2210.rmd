@@ -150,7 +150,7 @@ zipcodes_df =
 
 Importing and tidying ZORI data
 ```{r zori}
-zori_df =
+rentalprice_df =
   read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = c("NA", ".", "")) %>% 
   rename_with(janitor::make_clean_names, .cols = 1:9) %>% 
   pivot_longer(
@@ -169,7 +169,7 @@ Merging zip codes and ZORI datasets
 ```{r zillow}
 zillow_df =
   full_join(
-    zori_df, zipcodes_df
+    rentalprice_df, zipcodes_df
     ) %>%
   relocate(date, zip_code, county)
 ```
@@ -185,5 +185,13 @@ zillow_df %>%
   distinct()
 ```
 
-
 The new merged dataset has `r nrow(zillow_df)` observations. There are 320 unique zipcodes in the dataset, and 42 unique neighborhoods (using the distinct function outputs 43 unique values, but one such value is "NA" so I am excluding it from my count). 
+
+Zipcodes in the zipcodes dataset vs rental price dataset
+```{r}
+anti_join(zipcodes_df, rentalprice_df, by = "zip_code") %>%
+  select(zip_code, county, date) %>%
+  distinct()
+```
+
+There are 171 unique zip codes, in the 5 counties/boroughs of the Bronx, Kings, Manhattan, Queens, and Richmond that were not represented in the Zillow Rental Price dataset. Importantly, the zip codes dataset is from the year 2007 while the rental price dataset is from 2015-2024. In this time, the 171 zip codes may have been retired or reorganized, or there may have just been insufficient data for these zip codes in these later years. 
