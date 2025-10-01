@@ -142,23 +142,17 @@ The cleaned dataset contains `r nrow(trashwheel_df)` observations of trash colle
 Importing and tidying zipcodes dataset
 ```{r zipcodes}
 zipcodes_df =
-  read_csv("zillow_data/Zip Codes.csv", na = c("NA", ".", "")) %>%
-  janitor::clean_names()
-
-  # find which ones are duplicates
-
-zipcodes_df$zip_code[duplicated(zipcodes_df$zip_code)]
-
-# 10463 is in the Bronx
-# 11201 is in Kings
-# remove the observations where this shows up in New York County
-
-zipcodes_df = zipcodes_df %>%
-  filter(!(zip_code %in% c(10463, 11201) & county == "New York"))
+  read_csv(
+    "zillow_data/Zip Codes.csv", 
+    na = c("NA", ".", "")
+    ) %>%
+  janitor::clean_names() %>%
+    filter(!(zip_code %in% c(10463, 11201) & county == "New York"))%>%
+  select(-state_fips, -county_code, -county_fips, -file_date)
 ```
 
-Importing and tidying ZORI data
-```{r zori}
+Importing and tidying rental data
+```{r rental-price}
 rentalprice_df =
   read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = c("NA", ".", "")) %>% 
   rename_with(janitor::make_clean_names, .cols = 1:9) %>% 
@@ -167,11 +161,14 @@ rentalprice_df =
     names_to = "date",
     values_to = "rent",
   ) %>% 
-  mutate(
-    county_name = str_trim(gsub("County", "", county_name)),
-    date = as.Date(date)
+  mutate(date = as.Date(date),
   ) %>% 
-  rename(zip_code = region_name, county = county_name)
+  rename(zip_code = region_name, county = county_name) %>%
+  mutate(
+    county = (str_remove(county, "County"))
+  ) %>% 
+  select(-region_id, -size_rank, -region_type, -state_name, -metro, -county)
+  
 ```
 
 Merging zip codes and rental price datasets
@@ -180,7 +177,7 @@ zillow_df =
   left_join(
     rentalprice_df, zipcodes_df, by = "zip_code"
     ) %>% 
-  relocate(date, zip_code)
+  relocate(date, state, city, county, zip_code, neighborhood, rent)
 ```
 
 Finding unique observations
@@ -199,3 +196,24 @@ anti_join(zipcodes_df, rentalprice_df, by = "zip_code") %>%
 ```
 
 The new merged dataset has `r nrow(zillow_df)` observations. There are 149 unique zipcodes in the dataset, and 43 unique neighborhoods.There are 171 unique zip codes, in the 5 counties/boroughs of the Bronx, Kings, Manhattan, Queens, and Richmond that were not represented in the Zillow Rental Price dataset. [Examples for why these are not included in the rentalprice_df]
+
+```{r}
+pricedrop_df =
+  zillow_df %>% 
+  filter(month(date) == 1, year(date) %in% c(2020, 2021)) %>%
+  mutate(date = as.character(date)) %>%
+  pivot_wider(
+    names_from = "date",
+    values_from = "rent"
+  ) %>% 
+  rename(
+    rent_2020 = "2020-01-31",
+    rent_2021 = "2021-01-31"
+  ) %>% 
+  mutate(price_drop = rent_2020 - rent_2021) %>% 
+  arrange(desc(price_drop))
+
+knitr::kable(head(pricedrop_df, 10))
+```
+
+The borough with the top 10 price drops between January 2020 and January 2021 was Manhattan/New York. The largest price drop was 912.60 dollars in the Lower Manhattan neighborhood. Out of these 10 largest price drops, the lowest was 684.93 dollars in the Gramercy Park and Murray Hill neighborhood.
