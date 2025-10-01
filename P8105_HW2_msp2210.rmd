@@ -147,8 +147,8 @@ zipcodes_df =
     na = c("NA", ".", "")
     ) %>%
   janitor::clean_names() %>%
-    filter(!(zip_code %in% c(10463, 11201) & county == "New York"))%>%
-  select(-state_fips, -county_code, -county_fips, -file_date)
+  select(-state_fips, -county_code, -county_fips, -file_date) %>% 
+  filter(!(zip_code %in% c(10463, 11201) & county == "New York"))
 ```
 
 Importing and tidying rental data
@@ -168,7 +168,6 @@ rentalprice_df =
     county = (str_remove(county, "County"))
   ) %>% 
   select(-region_id, -size_rank, -region_type, -state_name, -metro, -county)
-  
 ```
 
 Merging zip codes and rental price datasets
@@ -195,7 +194,9 @@ anti_join(zipcodes_df, rentalprice_df, by = "zip_code") %>%
   distinct()
 ```
 
-The new merged dataset has `r nrow(zillow_df)` observations. There are 149 unique zipcodes in the dataset, and 43 unique neighborhoods.There are 171 unique zip codes, in the 5 counties/boroughs of the Bronx, Kings, Manhattan, Queens, and Richmond that were not represented in the Zillow Rental Price dataset. [Examples for why these are not included in the rentalprice_df]
+The new merged dataset has `r nrow(zillow_df)` observations. There are 149 unique zipcodes in the dataset, and 43 unique neighborhoods. 
+
+In the zipcodes dataset, there are 171 unique zip codes for the 5 counties/boroughs of the Bronx, Kings, Manhattan, Queens, and Richmond that were not represented in the Zillow Rental Price dataset. These zip codes are not included in the rental price dataset because they are primarily non-residential neighborhoods and areas. An internet search confirms this fact; for example, Bronx zip-code 10474 refers to the Hunts Point neighborhood, which is a heavily industrial area (`r '[source](https://www.zipwise.com/zip-code/10474)'`). Similarly, the zip code of 11202 in Kings County is where the UN Headquarters, the Chrysler Building, and the Empire State Building are located, which is a non-residential area as well (`r '[source](https://www.zipwise.com/zip-code/11202)'`). As the rental price dataset only captures the rents in residential areas, it does not include the zip codes of these heavily industrial areas/neighborhoods.
 
 ```{r}
 pricedrop_df =
