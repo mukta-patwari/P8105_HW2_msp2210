@@ -143,9 +143,18 @@ Importing and tidying zipcodes dataset
 ```{r zipcodes}
 zipcodes_df =
   read_csv("zillow_data/Zip Codes.csv", na = c("NA", ".", "")) %>%
-  janitor::clean_names() %>% 
-  mutate(file_date = as.Date(file_date, format = "%m/%d/%y")) %>% 
-  rename(date = file_date)
+  janitor::clean_names()
+
+  # find which ones are duplicates
+
+zipcodes_df$zip_code[duplicated(zipcodes_df$zip_code)]
+
+# 10463 is in the Bronx
+# 11201 is in Kings
+# remove the observations where this shows up in New York County
+
+zipcodes_df = zipcodes_df %>%
+  filter(!(zip_code %in% c(10463, 11201) & county == "New York"))
 ```
 
 Importing and tidying ZORI data
@@ -165,13 +174,13 @@ rentalprice_df =
   rename(zip_code = region_name, county = county_name)
 ```
 
-Merging zip codes and ZORI datasets
+Merging zip codes and rental price datasets
 ```{r zillow}
 zillow_df =
-  full_join(
-    rentalprice_df, zipcodes_df
-    ) %>%
-  relocate(date, zip_code, county)
+  left_join(
+    rentalprice_df, zipcodes_df, by = "zip_code"
+    ) %>% 
+  relocate(date, zip_code)
 ```
 
 Finding unique observations
@@ -183,15 +192,10 @@ zillow_df %>%
 zillow_df %>% 
   select(neighborhood) %>% 
   distinct()
-```
 
-The new merged dataset has `r nrow(zillow_df)` observations. There are 320 unique zipcodes in the dataset, and 42 unique neighborhoods (using the distinct function outputs 43 unique values, but one such value is "NA" so I am excluding it from my count). 
-
-Zipcodes in the zipcodes dataset vs rental price dataset
-```{r}
 anti_join(zipcodes_df, rentalprice_df, by = "zip_code") %>%
-  select(zip_code, county, date) %>%
+  select(zip_code, county) %>%
   distinct()
 ```
 
-There are 171 unique zip codes, in the 5 counties/boroughs of the Bronx, Kings, Manhattan, Queens, and Richmond that were not represented in the Zillow Rental Price dataset. Importantly, the zip codes dataset is from the year 2007 while the rental price dataset is from 2015-2024. In this time, the 171 zip codes may have been retired or reorganized, or there may have just been insufficient data for these zip codes in these later years. 
+The new merged dataset has `r nrow(zillow_df)` observations. There are 149 unique zipcodes in the dataset, and 43 unique neighborhoods.There are 171 unique zip codes, in the 5 counties/boroughs of the Bronx, Kings, Manhattan, Queens, and Richmond that were not represented in the Zillow Rental Price dataset. [Examples for why these are not included in the rentalprice_df]
