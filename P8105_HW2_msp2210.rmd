@@ -217,4 +217,4 @@ pricedrop_df =
 knitr::kable(head(pricedrop_df, 10))
 ```
 
-The borough with the top 10 price drops between January 2020 and January 2021 was Manhattan/New York. The largest price drop was 912.60 dollars in the Lower Manhattan neighborhood. Out of these 10 largest price drops, the lowest was 684.93 dollars in the Gramercy Park and Murray Hill neighborhood.
+The borough with the top 10 price drops between January 2020 and January 2021 was Manhattan/New York. The largest price drop was 912.60 dollars in the Lower Manhattan neighborhood. Out of these 10 largest price drops, the lowest was 684.93 dollars in the Gramercy Park and Murray Hill neighborhood. The drop in price was likely due to the pandemic causing lockdowns and for people to relocate (for example, people who moved to the city for work only to move back to their home city or state for remote work), and so to compensate for these vacancies, the rent was made cheaper to attract renters. 
